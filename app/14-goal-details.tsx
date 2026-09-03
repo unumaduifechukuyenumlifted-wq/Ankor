@@ -20,6 +20,7 @@ import {
 import { C, SHADOW, T } from '../src/theme';
 import { useApp } from '../src/store/AppProvider';
 import { money, fmtDate } from '../src/lib/format';
+import { isGoalMatured, unlockConditionLabel } from '../src/lib/locks';
 import { PRIORITY_LABEL } from '../src/lib/finance';
 import { Goal } from '../src/lib/types';
 
@@ -46,7 +47,10 @@ export default function GoalDetails() {
 
   const pct = Math.min(1, goal.savedAmount / goal.targetAmount);
   const remaining = Math.max(0, goal.targetAmount - goal.savedAmount);
-  const canWithdraw = wallet.type !== 'locked' && wallet.balance > 0;
+  const isLockedAccess = goal.accessType === 'locked';
+  const matured = isGoalMatured(goal);
+  const hardLocked = isLockedAccess && !matured; // ABSOLUTE LOCK (spec 4.4)
+  const canWithdraw = !hardLocked && wallet.balance > 0;
   const txs = state.transactions
     .filter((t) => t.goalId === goal.id || (t.walletId === wallet.id && (t.type === 'savings' || t.type === 'withdrawal')))
     .slice(0, 8);
@@ -79,6 +83,12 @@ export default function GoalDetails() {
     }
   };
 
+  const showHardLock = () =>
+    showModal({
+      type: 'hard-lock',
+      props: { unlockDatePretty: fmtDate(goal.targetDate), targetAmount: goal.targetAmount },
+    });
+
   const askDelete = () =>
     showModal({
       type: 'delete-goal',
@@ -110,6 +120,14 @@ export default function GoalDetails() {
         <Text style={{ ...T.label, color: 'rgba(247,242,232,0.55)', marginTop: 16 }}>TARGET AMOUNT</Text>
         <Text style={styles.target}>{money(goal.targetAmount)}</Text>
         <Text style={{ ...T.small, color: 'rgba(247,242,232,0.6)', marginTop: 2 }}>by {fmtDate(goal.targetDate)}</Text>
+        {isLockedAccess ? (
+          <View style={[styles.lockChip, { backgroundColor: matured ? 'rgba(79,111,82,0.30)' : 'rgba(201,154,59,0.20)' }]}>
+            <Ionicons name={matured ? 'lock-open-outline' : 'lock-closed'} size={12} color={matured ? '#9CC7A1' : C.gold} />
+            <Text style={{ ...T.small, color: matured ? '#BADBBE' : '#E3C687', marginLeft: 5 }}>
+              {matured ? 'Unlocked — withdrawals available' : `Strictly locked · ${unlockConditionLabel(goal)}`}
+            </Text>
+          </View>
+        ) : null}
         <ProgressBar progress={pct} color={C.gold} track="rgba(247,242,232,0.16)" height={10} style={{ marginTop: 16 }} />
         <View style={{ flexDirection: 'row', marginTop: 12 }}>
           <View style={{ flex: 1 }}>
@@ -125,7 +143,9 @@ export default function GoalDetails() {
 
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 18 }}>
         <Button label="Add Money" icon="add" style={{ flex: 1 }} onPress={() => setAdding(true)} />
-        {canWithdraw ? (
+        {hardLocked ? (
+          <Button label="Withdraw" variant="outline" icon="lock-closed" style={{ flex: 1 }} onPress={showHardLock} />
+        ) : canWithdraw ? (
           <Button
             label="Withdraw"
             variant="outline"
@@ -135,8 +155,8 @@ export default function GoalDetails() {
           />
         ) : (
           <View style={[styles.lockedNote]}>
-            <Ionicons name="lock-closed" size={14} color={C.gray} />
-            <Text style={{ ...T.small, marginLeft: 6 }}>{wallet.type === 'locked' ? 'Locked until target' : 'No balance yet'}</Text>
+            <Ionicons name="wallet-outline" size={14} color={C.gray} />
+            <Text style={{ ...T.small, marginLeft: 6 }}>No balance yet</Text>
           </View>
         )}
       </View>
@@ -194,6 +214,7 @@ const styles = StyleSheet.create({
   },
   target: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 38, color: C.onNavy, marginTop: 4 },
   heroNum: { fontFamily: 'Inter_700Bold', fontSize: 19, color: C.onNavy, marginTop: 4 },
+  lockChip: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, marginTop: 10 },
   lockedNote: {
     flex: 1,
     borderRadius: 16,

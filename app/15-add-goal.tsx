@@ -30,7 +30,8 @@ export default function AddGoal() {
   const [months, setMonths] = useState(3);
   const [priority, setPriority] = useState<Priority>(existing?.priority ?? 'important');
   const [walletType, setWalletType] = useState(existing ? state.wallets.find((w) => w.id === existing.walletId)?.type : undefined);
-  const [sheet, setSheet] = useState<null | 'category' | 'date' | 'wallet'>(null);
+  const [unlockMode, setUnlockMode] = useState<'date' | 'funded'>(existing?.unlockMode ?? 'date');
+  const [sheet, setSheet] = useState<null | 'category' | 'date' | 'wallet' | 'unlock'>(null);
   const [err, setErr] = useState<string | null>(null);
   const [netErr, setNetErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -59,7 +60,7 @@ export default function AddGoal() {
       if (existing) {
         dispatch({
           type: 'UPDATE_GOAL',
-          goal: { ...existing, name: name.trim(), targetAmount: targetNum, targetDate, priority, walletId: wallet?.id ?? existing.walletId, category: category || existing.category },
+          goal: { ...existing, name: name.trim(), targetAmount: targetNum, targetDate, priority, walletId: wallet?.id ?? existing.walletId, category: category || existing.category, accessType: effectiveWallet, unlockMode },
         });
       } else {
         dispatch({
@@ -75,6 +76,8 @@ export default function AddGoal() {
             category: category || 'Other',
             status: 'active',
             createdAt: toISO(new Date()),
+            accessType: effectiveWallet,
+            unlockMode,
           },
         });
       }
@@ -120,6 +123,21 @@ export default function AddGoal() {
           </InfoBanner>
         ) : null}
 
+        {effectiveWallet === 'locked' ? (
+          <>
+            <SelectField
+              label="Unlock Condition"
+              value={unlockMode === 'date' ? 'On target date' : 'When 100% funded'}
+              onPress={() => setSheet('unlock')}
+              icon="lock-closed-outline"
+              style={{ marginTop: 12 }}
+            />
+            <InfoBanner style={{ marginTop: 10 }} icon="lock-closed">
+              Locked goals are strictly locked until the condition above is met. Funds cannot be withdrawn or moved early — no fees, no exceptions.
+            </InfoBanner>
+          </>
+        ) : null}
+
         {/* Priority selector */}
         <Text style={{ ...T.label, marginTop: 18, marginBottom: 8 }}>PRIORITY</Text>
         <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -162,6 +180,17 @@ export default function AddGoal() {
         options={dateOptions}
         selected={`${months} months`}
         onSelect={(label) => setMonths(Number(label.split(' ')[0]))}
+        onClose={() => setSheet(null)}
+      />
+      <OptionSheet
+        visible={sheet === 'unlock'}
+        title="Unlock Condition"
+        options={[
+          { label: 'On target date', sub: 'Default — unlocks when your target date arrives' },
+          { label: 'When 100% funded', sub: 'Unlocks as soon as the goal is fully funded' },
+        ]}
+        selected={unlockMode === 'date' ? 'On target date' : 'When 100% funded'}
+        onSelect={(label) => setUnlockMode(label === 'When 100% funded' ? 'funded' : 'date')}
         onClose={() => setSheet(null)}
       />
       <OptionSheet

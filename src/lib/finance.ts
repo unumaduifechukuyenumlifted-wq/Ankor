@@ -19,6 +19,7 @@ export const CATEGORY_STYLE: Record<string, { icon: string; color: string; soft:
   Gifts: { icon: 'gift', color: '#C1573B', soft: '#F2DCD2' },
   Savings: { icon: 'wallet', color: '#4F6F52', soft: '#DFE8DD' },
   Withdrawal: { icon: 'arrow-up', color: '#C1573B', soft: '#F2DCD2' },
+  'Emergency Withdrawal': { icon: 'medkit', color: '#C1573B', soft: '#F2DCD2' },
 };
 
 export const categoryStyle = (name: string) =>

@@ -22,6 +22,7 @@ import {
   uid,
   walletForGoalCategory,
 } from '../lib/finance';
+import { isGoalMatured } from '../lib/locks';
 import { toISO, daysBetween } from '../lib/format';
 
 const STORAGE_KEY = 'anchor-state-v2';
@@ -253,6 +254,8 @@ export const reducer = (s: AppState, a: Action): AppState => {
           category: g.name,
           status: 'active',
           createdAt: now,
+          accessType: walletForGoalCategory(g.name),
+          unlockMode: 'date' as const,
         };
       });
 
@@ -486,6 +489,13 @@ export const reducer = (s: AppState, a: Action): AppState => {
       const goalOnWallet = s.goals
         .filter((g) => g.walletId === wallet.id && g.status === 'active')
         .sort((x, y) => y.savedAmount - x.savedAmount)[0];
+      // ABSOLUTE LOCK (spec §4.4 / §12.1) — data-layer backstop. The UI blocks this
+      // first with the Hard Lock Modal; if a debit like this ever reaches the store
+      // anyway, the mutation is rejected and no money moves. No fees. No overrides.
+      if (goalOnWallet && goalOnWallet.accessType === 'locked' && !isGoalMatured(goalOnWallet)) {
+        return s;
+      }
+      const isEmergency = wallet.type === 'emergency';
       return applyMetrics({
         ...s,
         wallets: s.wallets.map((w) => (w.id === a.walletId ? { ...w, balance: Math.max(0, w.balance - a.amount) } : w)),
@@ -497,8 +507,9 @@ export const reducer = (s: AppState, a: Action): AppState => {
             id: uid('tx'),
             type: 'withdrawal' as const,
             amount: a.amount,
-            category: 'Withdrawal',
-            description: `Withdrawal to ${a.account.bank} •••• ${a.account.accountNumber.slice(-4)}`,
+            // Emergency usage is logged distinctly (spec §4.4) to track emergency draws.
+            category: isEmergency ? 'Emergency Withdrawal' : 'Withdrawal',
+            description: `${isEmergency ? 'Emergency Fund withdrawal' : 'Withdrawal'} to ${a.account.bank} •••• ${a.account.accountNumber.slice(-4)}`,
             date: a.date,
             walletId: a.walletId,
             goalId: goalOnWallet?.id,
@@ -549,6 +560,7 @@ export type ModalType =
   | 'otp-sent'
   | 'budget-exceeded'
   | 'withdraw-confirm'
+  | 'hard-lock'
   | 'delete-goal'
   | 'account-linked'
   | 'logout'
@@ -585,7 +597,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .then((raw) => {
         if (raw) {
           const parsed = JSON.parse(raw) as AppState;
-          dispatch({ type: 'HYDRATE', state: { ...INITIAL_STATE, ...parsed, hydrated: true } });
+          // Migration: goals created before the Absolute Lock spec lack accessType/unlockMode.
+          const typeByWallet = new Map((parsed.wallets ?? []).map((w) => [w.id, w.type]));
+          const goals = (parsed.goals ?? []).map((g) => ({
+            ...g,
+            accessType: g.accessType ?? typeByWallet.get(g.walletId) ?? 'flexible',
+            unlockMode: g.unlockMode ?? 'date',
+          }));
+          dispatch({ type: 'HYDRATE', state: { ...INITIAL_STATE, ...parsed, goals, hydrated: true } });
         } else {
           dispatch({ type: 'HYDRATE', state: INITIAL_STATE });
         }

@@ -41,6 +41,7 @@ export default function WithdrawStep3() {
         amount,
         walletName: wallet.name,
         bank: account.bank,
+        emergency: wallet.type === 'emergency',
         onConfirm: () => {
           const reference = refCode();
           const date = toISO(new Date());

@@ -33,6 +33,10 @@ export interface Goal {
   category: string;
   status: 'active' | 'completed';
   createdAt: string;
+  /** Access tier (spec §4.4). Derived from wallet type at creation. */
+  accessType: 'flexible' | 'locked' | 'emergency';
+  /** Which condition unlocks a locked goal (spec §4.4). Default: 'date'. */
+  unlockMode: 'date' | 'funded';
 }
 
 export interface Transaction {

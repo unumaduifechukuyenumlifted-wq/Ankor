@@ -1,5 +1,5 @@
 /** Screen 27 (step 1 of 4) — Send to your bank: wallet, amount, daily-limit banner. */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,26 +10,29 @@ import { WalletBadge } from '../../src/components/ui';
 import { C, T } from '../../src/theme';
 import { useApp } from '../../src/store/AppProvider';
 import { money } from '../../src/lib/format';
+import { lockViolationForWithdrawal } from '../../src/lib/locks';
 
 export default function WithdrawStep1() {
   const { walletId } = useLocalSearchParams<{ walletId?: string }>();
   const insets = useSafeAreaInsets();
-  const { state, dispatch } = useApp();
+  const { state, dispatch, showModal } = useApp();
   const [wallet, setWallet] = useState<string | undefined>(walletId ?? state.withdrawDraft?.walletId ?? state.wallets[0]?.id);
   const [amount, setAmount] = useState(state.withdrawDraft?.amount ? String(state.withdrawDraft.amount) : '');
   const [sheet, setSheet] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    dispatch({ type: 'PATCH', patch: { withdrawDraft: { ...state.withdrawDraft, walletId: wallet } } });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet]);
-
   const w = state.wallets.find((x) => x.id === wallet);
+  // ABSOLUTE LOCK: is the goal this withdrawal would debit still locked?
+  const lockViolation = wallet ? lockViolationForWithdrawal(state.wallets, state.goals, wallet) : null;
   const amountNum = Number(amount);
 
   const next = () => {
     if (!w) return;
+    if (lockViolation) {
+      // Hard Lock Modal (spec 3.4) — the request never proceeds.
+      showModal({ type: 'hard-lock', props: { unlockDatePretty: lockViolation.unlockDatePretty, targetAmount: lockViolation.targetAmount } });
+      return;
+    }
     if (!amountNum || amountNum <= 0) return setErr('Enter an amount');
     if (amountNum > w.balance) return setErr(`That's more than this wallet's ${money(w.balance)} balance`);
     setErr(null);
@@ -86,9 +89,15 @@ export default function WithdrawStep1() {
 
       {err ? <Text style={{ ...T.small, color: C.terracotta, marginTop: 8 }}>{err}</Text> : null}
 
-      <InfoBanner style={{ marginTop: 14 }} icon="information-circle">
-        You can withdraw up to {money(w?.balance ?? 0)} from this wallet today.
-      </InfoBanner>
+      {lockViolation ? (
+        <InfoBanner style={{ marginTop: 14 }} icon="lock-closed">
+          Strictly locked: {lockViolation.goalName} {lockViolation.message} Nothing can be moved or withdrawn early.
+        </InfoBanner>
+      ) : (
+        <InfoBanner style={{ marginTop: 14 }} icon="information-circle">
+          You can withdraw up to {money(w?.balance ?? 0)} from this wallet today.
+        </InfoBanner>
+      )}
 
       <View style={{ marginTop: 'auto', marginBottom: insets.bottom + 20 }}>
         <Button label="Continue" onPress={next} disabled={!amountNum || !!err} />

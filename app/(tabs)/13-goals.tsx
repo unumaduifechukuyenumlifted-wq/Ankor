@@ -8,6 +8,7 @@ import { Button, Card, EmptyState, ProgressBar, Screen, TagPill, useBottomPad } 
 import { C, SHADOW, T } from '../../src/theme';
 import { useApp } from '../../src/store/AppProvider';
 import { money, moneyK, fmtDateShort } from '../../src/lib/format';
+import { isGoalMatured } from '../../src/lib/locks';
 
 const WALLET_STYLE = {
   flexible: { bg: '#2E4666', accent: C.gold, tag: 'Flexible' },
@@ -93,6 +94,13 @@ export default function Goals() {
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Text style={{ ...T.h3, fontSize: 16 }}>{g.name}</Text>
+                    {g.accessType === 'locked' ? (
+                      <Ionicons
+                        name={isGoalMatured(g) ? 'lock-open-outline' : 'lock-closed'}
+                        size={13}
+                        color={isGoalMatured(g) ? C.green : C.gold}
+                      />
+                    ) : null}
                     {g.status === 'completed' ? <TagPill label="Completed" color={C.green} bg={C.greenSoft} icon="checkmark" /> : null}
                   </View>
                   <Text style={{ ...T.small, marginTop: 3 }}>

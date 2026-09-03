@@ -39,6 +39,19 @@ On first launch you'll get the Splash → Welcome → Sign Up → OTP → Onboar
   see `src/components/Logo.tsx` (in-app) and `scripts/make_assets.py`
   (icon / splash / favicon PNGs)
 
+## Access rules (Absolute Lock Integrity, spec §4.4)
+
+| Wallet | Withdrawal behavior |
+|---|---|
+| **Flexible Savings** | Always available, always succeeds immediately (subject to balance) |
+| **Emergency Fund** | Accessible, but every withdrawal shows a purpose-reminder confirmation and is **logged distinctly** (`Emergency Withdrawal`) to track emergency usage |
+| **Locked Savings** | **Absolute hard lock.** Funds cannot be moved, withdrawn, or reallocated until the goal's unlock condition is met — `targetDate` reached **or** 100% funded (user picks at creation, default: target date). No fees, no support overrides, no break-glass |
+
+Enforcement is layered:
+- `src/lib/locks.ts` — single source of truth (`isGoalMatured`, `lockViolationForWithdrawal`, the `LOCKED_GOAL` violation shape mirroring the spec's `403` payload)
+- UI: tapping Withdraw on an immature locked goal opens the **Hard Lock Modal** (gold padlock, "Funds are Strictly Locked", single "Understood" action — no bypass). The withdrawal form is never reached. Goal cards show a closed padlock that flips to an open lock once matured.
+- Data layer: the store's `EXECUTE_WITHDRAWAL` mutation re-checks the lock and **rejects the debit** if an immature locked goal would be touched — even if the UI were bypassed.
+
 ## Screen map (numbers match the spec)
 
 | # | Route | Screen |

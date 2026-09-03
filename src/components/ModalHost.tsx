@@ -120,7 +120,17 @@ export const ModalHost: React.FC = () => {
           />
         );
       case 'withdraw-confirm':
-        return (
+        return p.emergency ? (
+          <WarnBody
+            icon="medkit"
+            title="Withdraw from your Emergency Fund?"
+            message={`This fund is your safety net for genuine surprises. ${money(p.amount ?? 0)} will leave your Emergency Fund for ${p.bank ?? 'your bank'} — withdrawals from here are logged so you can track emergency usage. Only continue if you truly need it.`}
+            primaryLabel="Yes, I need it"
+            secondaryLabel="Not yet"
+            onPrimary={run(p.onConfirm)}
+            onSecondary={run(undefined)}
+          />
+        ) : (
           <WarnBody
             icon="alert-circle"
             title="Confirm withdrawal"
@@ -130,6 +140,26 @@ export const ModalHost: React.FC = () => {
             onPrimary={run(p.onConfirm)}
             onSecondary={run(undefined)}
           />
+        );
+      case 'hard-lock':
+        // ABSOLUTE HARD LOCK (spec §3.4) — educational and terminal. No "continue anyway".
+        return (
+          <>
+            <View style={[styles.iconCircle, { backgroundColor: C.goldSoft }]}>
+              <Ionicons name="lock-closed" size={32} color={C.gold} />
+            </View>
+            <Text style={[T.h2, { textAlign: 'center', marginTop: 16 }]}>Funds are Strictly Locked</Text>
+            <Text style={[T.small, { textAlign: 'center', marginTop: 8, lineHeight: 21 }]}>
+              To protect your commitment, money in this goal cannot be withdrawn or moved early. This ensures the plan
+              you made while calm survives temptation.
+            </Text>
+            <Text style={{ ...T.small500, textAlign: 'center', marginTop: 12, color: C.navy }}>
+              This goal will unlock on{' '}
+              <Text style={{ fontFamily: 'Inter_700Bold' }}>{String(p.unlockDatePretty ?? '')}</Text> or when you reach{' '}
+              <Text style={{ fontFamily: 'Inter_700Bold' }}>{money(p.targetAmount ?? 0)}</Text>.
+            </Text>
+            <Button label="Understood" onPress={run(undefined)} style={{ marginTop: 22 }} />
+          </>
         );
       case 'delete-goal':
         return (

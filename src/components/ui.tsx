@@ -450,7 +450,14 @@ export const WalletBadge: React.FC<{ type: 'flexible' | 'locked' | 'emergency'; 
 
 export const TxRow: React.FC<{ tx: Transaction; onPress?: () => void; last?: boolean }> = ({ tx, onPress, last }) => {
   const positive = tx.type === 'income';
-  const category = tx.type === 'income' ? tx.category : tx.type === 'savings' ? 'Savings' : tx.type === 'withdrawal' ? 'Withdrawal' : tx.category;
+  const category =
+    tx.type === 'income'
+      ? tx.category
+      : tx.type === 'savings'
+        ? 'Savings'
+        : tx.type === 'withdrawal'
+          ? tx.category || 'Withdrawal'
+          : tx.category;
   const sign = positive ? '+' : '-';
   return (
     <Pressable onPress={onPress} disabled={!onPress} style={({ pressed }) => [styles.txRow, pressed && { opacity: 0.75 }, !last && { borderBottomWidth: 1, borderBottomColor: C.border }]}>
