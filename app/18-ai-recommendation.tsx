@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader, Button, Card, InfoBanner } from '../src/components/ui';
+import { AppHeader, Button, Card, InfoBanner , FlexScroll } from '../src/components/ui';
 import { C, T } from '../src/theme';
 import { useApp, Split } from '../src/store/AppProvider';
 import { money } from '../src/lib/format';
@@ -68,7 +68,7 @@ export default function AiRecommendation() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="AI Recommendation" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <Text style={styles.heading}>Here's how to split it</Text>
         <Text style={styles.sub}>
           Your {money(draft.amount)} {draft.source.toLowerCase()} income, anchored the 50/30/20 way.
@@ -119,7 +119,7 @@ export default function AiRecommendation() {
           <Button label={editing ? 'Accept Split' : 'Accept'} onPress={() => accept(split)} disabled={editing && total !== draft.amount} />
           <Button label="Edit" variant="outline" style={{ marginTop: 12 }} onPress={() => setEditing((e) => !e)} />
         </View>
-      </View>
+      </FlexScroll>
     </View>
   );
 }

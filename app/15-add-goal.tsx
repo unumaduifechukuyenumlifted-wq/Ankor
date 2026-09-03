@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, AmountInput, Button, ErrorBanner, Field, InfoBanner, SelectField } from '../src/components/ui';
+import { AppHeader, AmountInput, Button, ErrorBanner, Field, InfoBanner, SelectField , FlexScroll } from '../src/components/ui';
 import { OptionSheet, Option } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { useApp } from '../src/store/AppProvider';
@@ -89,7 +89,7 @@ export default function AddGoal() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title={existing ? 'Edit Goal' : 'New Goal'} />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <Text style={styles.heading}>{existing ? 'Adjust your goal' : 'What are you anchoring?'}</Text>
         <Text style={styles.sub}>Anchor assigns the right wallet automatically.</Text>
 
@@ -143,7 +143,7 @@ export default function AddGoal() {
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
           <Button label={existing ? 'Save Changes' : 'Save Goal'} onPress={save} loading={saving} />
         </View>
-      </View>
+      </FlexScroll>
 
       <OptionSheet
         visible={sheet === 'category'}

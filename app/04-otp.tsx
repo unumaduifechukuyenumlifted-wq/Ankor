@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, Button } from '../src/components/ui';
+import { AppHeader, Button , FlexScroll } from '../src/components/ui';
 import { useApp } from '../src/store/AppProvider';
 import { C, T } from '../src/theme';
 
@@ -61,7 +61,7 @@ export default function OtpVerification() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Verify it's you" />
-      <View style={{ paddingHorizontal: 24, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 24 }}>
         <Text style={styles.sub}>
           We sent a 6-digit code to{'\n'}
           <Text style={{ color: C.navy, fontFamily: 'Inter_600SemiBold' }}>{destination}</Text>
@@ -118,7 +118,7 @@ export default function OtpVerification() {
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
           <Button label="Continue" onPress={submit} disabled={code.length !== 6} />
         </View>
-      </View>
+      </FlexScroll>
     </View>
   );
 }

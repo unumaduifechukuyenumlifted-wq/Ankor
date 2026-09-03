@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, Button, Field, ProgressBar, SelectField } from '../src/components/ui';
+import { AppHeader, Button, Field, ProgressBar, SelectField , FlexScroll } from '../src/components/ui';
 import { OptionSheet } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { onboardingDraft } from '../src/store/onboardingDraft';
@@ -52,7 +52,7 @@ export default function PersonalInfo() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Personal information" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <ProgressBar progress={0.25} color={C.gold} style={{ marginBottom: 22 }} />
         <Text style={styles.heading}>Let's get to know you</Text>
         <Text style={styles.sub}>This helps Anchor tailor your budget and AI coaching.</Text>
@@ -73,7 +73,7 @@ export default function PersonalInfo() {
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
           <Button label="Continue" onPress={next} />
         </View>
-      </View>
+      </FlexScroll>
 
       <OptionSheet
         visible={sheet === 'country'}

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, Button, Field, InfoBanner } from '../src/components/ui';
+import { AppHeader, Button, Field, InfoBanner , FlexScroll } from '../src/components/ui';
 import { useApp } from '../src/store/AppProvider';
 import { C, T } from '../src/theme';
 
@@ -57,7 +57,7 @@ export default function ForgotPassword() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Reset password" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <View style={styles.steps}>
           {[1, 2, 3].map((s) => (
             <View key={s} style={[styles.stepDot, step >= s && styles.stepDotOn]} />
@@ -101,7 +101,7 @@ export default function ForgotPassword() {
             Password updated. Head back to the log in screen to continue.
           </InfoBanner>
         )}
-      </View>
+      </FlexScroll>
     </View>
   );
 }

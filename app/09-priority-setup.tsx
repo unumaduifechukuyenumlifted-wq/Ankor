@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader, Button, InfoBanner, ProgressBar } from '../src/components/ui';
+import { AppHeader, Button, InfoBanner, ProgressBar , FlexScroll } from '../src/components/ui';
 import { OptionSheet } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { onboardingDraft } from '../src/store/onboardingDraft';
@@ -38,7 +38,7 @@ export default function PrioritySetup() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Priority setup" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <ProgressBar progress={0.9} color={C.gold} style={{ marginBottom: 22 }} />
         <Text style={styles.heading}>Rank your goals</Text>
         <Text style={styles.sub}>
@@ -83,7 +83,7 @@ export default function PrioritySetup() {
           </Pressable>
           <Button label="Continue" onPress={next} />
         </View>
-      </View>
+      </FlexScroll>
 
       <OptionSheet
         visible={sheetFor !== null}

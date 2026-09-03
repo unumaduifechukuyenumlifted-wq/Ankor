@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader, Button, ProgressBar } from '../src/components/ui';
+import { AppHeader, Button, ProgressBar , FlexScroll } from '../src/components/ui';
 import { C, T } from '../src/theme';
 import { onboardingDraft } from '../src/store/onboardingDraft';
 import { GOAL_CATALOG, walletForGoalCategory } from '../src/lib/finance';
@@ -34,7 +34,7 @@ export default function FinancialGoals() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Financial goals" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <ProgressBar progress={0.75} color={C.gold} style={{ marginBottom: 22 }} />
         <Text style={styles.heading}>What are you saving for?</Text>
         <Text style={styles.sub}>Pick everything that applies — Anchor builds a wallet for each.</Text>
@@ -63,7 +63,7 @@ export default function FinancialGoals() {
           </Pressable>
           <Button label="Continue" onPress={next} disabled={selected.length === 0} />
         </View>
-      </View>
+      </FlexScroll>
     </View>
   );
 }

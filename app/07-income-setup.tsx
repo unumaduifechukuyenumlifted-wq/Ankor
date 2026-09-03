@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, AmountInput, Button, InfoBanner, ProgressBar, SelectField } from '../src/components/ui';
+import { AppHeader, AmountInput, Button, InfoBanner, ProgressBar, SelectField , FlexScroll } from '../src/components/ui';
 import { OptionSheet, Option } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { onboardingDraft } from '../src/store/onboardingDraft';
@@ -61,7 +61,7 @@ export default function IncomeSetup() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Income setup" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <ProgressBar progress={0.5} color={C.gold} style={{ marginBottom: 22 }} />
         <Text style={styles.heading}>How much comes in?</Text>
         <Text style={styles.sub}>Anchor uses your income to build a realistic plan.</Text>
@@ -97,7 +97,7 @@ export default function IncomeSetup() {
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
           <Button label="Continue" onPress={next} />
         </View>
-      </View>
+      </FlexScroll>
 
       <OptionSheet
         visible={sheet === 'freq'}

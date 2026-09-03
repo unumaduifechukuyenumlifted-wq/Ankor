@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, AmountInput, Button, ErrorBanner, InfoBanner, SelectField } from '../src/components/ui';
+import { AppHeader, AmountInput, Button, ErrorBanner, InfoBanner, SelectField , FlexScroll } from '../src/components/ui';
 import { OptionSheet, Option } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { useApp } from '../src/store/AppProvider';
@@ -91,7 +91,7 @@ export default function AddIncome() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Add Income" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <Text style={styles.heading}>Money in 🎉</Text>
         <Text style={styles.sub}>Log income and Anchor re-plans everything instantly.</Text>
 
@@ -111,7 +111,7 @@ export default function AddIncome() {
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
           <Button label="Continue" onPress={submit} loading={saving} />
         </View>
-      </View>
+      </FlexScroll>
 
       <OptionSheet visible={sheet === 'source'} title="Income Source" options={SOURCES} selected={source} onSelect={setSource} onClose={() => setSheet(null)} />
       <OptionSheet visible={sheet === 'date'} title="Date Received" options={dateOptions()} selected={dateReceived} onSelect={setDateReceived} onClose={() => setSheet(null)} />

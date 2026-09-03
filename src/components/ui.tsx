@@ -23,6 +23,33 @@ import { Transaction } from '../lib/types';
 
 /* ---------------------------------- Screen ---------------------------------- */
 
+/** Scrollable form body — keeps CTAs reachable on short viewports & with keyboard open.
+ *  Content shorter than the screen stretches (flexGrow), so `marginTop: 'auto'`
+ *  still pins footers to the bottom; taller content scrolls instead of clipping. */
+export const FormScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {children}
+    </ScrollView>
+  </KeyboardAvoidingView>
+);
+
+/** Drop-in replacement for `<View style={{ paddingHorizontal: X, flex: 1 }}>` form bodies —
+ *  same layout, but scrolls when content exceeds the viewport (buttons never clipped). */
+export const FlexScroll: React.FC<{ children: React.ReactNode; style?: StyleProp<ViewStyle> }> = ({
+  children,
+  style,
+}) => (
+  <FormScroll>
+    <View style={[{ flex: 1 }, style]}>{children}</View>
+  </FormScroll>
+);
+
 export const Screen: React.FC<{
   children: React.ReactNode;
   scroll?: boolean;
@@ -32,7 +59,7 @@ export const Screen: React.FC<{
 }> = ({ children, scroll = true, padded = true, kb = false, contentStyle }) => {
   const body = scroll ? <ScrollView
     showsVerticalScrollIndicator={false}
-    contentContainerStyle={[padded && styles.screenPad, contentStyle]}
+    contentContainerStyle={[{ flexGrow: 1 }, padded && styles.screenPad, contentStyle]}
     keyboardShouldPersistTaps="handled"
   >
     {children}

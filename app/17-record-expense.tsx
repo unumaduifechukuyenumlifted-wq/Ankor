@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader, AmountInput, Button, ErrorBanner, Field, SelectField } from '../src/components/ui';
+import { AppHeader, AmountInput, Button, ErrorBanner, Field, SelectField , FlexScroll } from '../src/components/ui';
 import { OptionSheet, Option } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { useApp } from '../src/store/AppProvider';
@@ -103,7 +103,7 @@ export default function RecordExpense() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Record Expense" />
-      <View style={{ paddingHorizontal: 20, flex: 1 }}>
+      <FlexScroll style={{ paddingHorizontal: 20 }}>
         <Text style={styles.heading}>What did you spend?</Text>
         <Text style={styles.sub}>Logging keeps your safe-to-spend honest.</Text>
 
@@ -134,7 +134,7 @@ export default function RecordExpense() {
           <Button label="Save Expense" onPress={save} loading={saving} />
           <Text style={{ ...T.small, textAlign: 'center', marginTop: 10 }}>Updates your budget instantly.</Text>
         </View>
-      </View>
+      </FlexScroll>
 
       <OptionSheet visible={sheet} title="Date" options={dateOptions()} selected={date} onSelect={setDate} onClose={() => setSheet(false)} />
     </View>
