@@ -239,30 +239,41 @@ export const SelectField: React.FC<{
   </Pressable>
 );
 
-/** Big amount input used on money screens. */
+/** Big amount input used on money screens.
+ *  Global overflow guard (shared component — applies to every money input):
+ *  - the input sits in a hard-bounded wrapper (flex + minWidth 0 + overflow hidden)
+ *  - font auto-shrinks as digits grow, so ₦999,999,999,999 still fits the box
+ */
 export const AmountInput: React.FC<{
   value: string;
   onChange: (v: string) => void;
   label?: string;
   autoFocus?: boolean;
   style?: StyleProp<ViewStyle>;
-}> = ({ value, onChange, label = 'AMOUNT', autoFocus, style }) => (
-  <View style={[styles.field, style]}>
-    <FieldLabel>{label}</FieldLabel>
-    <View style={styles.amountRow}>
-      <Text style={styles.amountPrefix}>₦</Text>
-        <TextInput
-          autoFocus={autoFocus}
-          keyboardType="number-pad"
-          placeholder="0"
-          placeholderTextColor={C.graySoft}
-          value={value}
-          onChangeText={(t) => onChange(t.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
-          style={styles.amountInput}
-        />
+}> = ({ value, onChange, label = 'AMOUNT', autoFocus, style }) => {
+  const digits = value.replace(/[^0-9]/g, '');
+  const fontSize = digits.length <= 6 ? 34 : digits.length <= 8 ? 30 : digits.length <= 10 ? 26 : 22;
+  return (
+    <View style={[styles.field, style]}>
+      <FieldLabel>{label}</FieldLabel>
+      <View style={styles.amountRow}>
+        <Text style={[styles.amountPrefix, { fontSize: Math.round(fontSize * 0.8) }]}>₦</Text>
+        <View style={styles.amountInputWrap}>
+          <TextInput
+            autoFocus={autoFocus}
+            keyboardType="number-pad"
+            placeholder="0"
+            placeholderTextColor={C.graySoft}
+            maxLength={13}
+            value={value}
+            onChangeText={(t) => onChange(t.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+            style={[styles.amountInput, { fontSize }]}
+          />
+        </View>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 /* -------------------------------- Info banner -------------------------------- */
 
@@ -537,10 +548,11 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   fieldValueRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, minHeight: 30 },
-  fieldInput: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 20, color: C.navy, padding: 0 },
-  amountRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: 4 },
+  fieldInput: { flex: 1, minWidth: 0, fontFamily: 'Inter_700Bold', fontSize: 20, color: C.navy, padding: 0 },
+  amountRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   amountPrefix: { fontFamily: 'PlayfairDisplay_700Bold', fontSize: 30, color: C.gray, marginRight: 8 },
-  amountInput: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 34, color: C.navy, padding: 0, minHeight: 42 },
+  amountInputWrap: { flex: 1, minWidth: 0, overflow: 'hidden' },
+  amountInput: { minWidth: 0, fontFamily: 'Inter_700Bold', fontSize: 34, color: C.navy, padding: 0, minHeight: 42 },
   banner: {
     backgroundColor: C.banner,
     borderRadius: R.banner,

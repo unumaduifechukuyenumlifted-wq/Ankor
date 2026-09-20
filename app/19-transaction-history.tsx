@@ -65,7 +65,7 @@ export default function TransactionHistory() {
               placeholderTextColor={C.graySoft}
               value={query}
               onChangeText={setQuery}
-              style={{ flex: 1, fontFamily: 'Inter_500Medium', fontSize: 14, color: C.navy, padding: 0 }}
+              style={{ flex: 1, minWidth: 0, fontFamily: 'Inter_500Medium', fontSize: 14, color: C.navy, padding: 0 }}
             />
             {query ? (
               <Pressable onPress={() => setQuery('')} hitSlop={8}>
