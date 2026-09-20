@@ -10,6 +10,7 @@ import { SuccessCheck } from '../src/components/SuccessCheck';
 import { C, T } from '../src/theme';
 import { useApp, Split } from '../src/store/AppProvider';
 import { onboardingDraft } from '../src/store/onboardingDraft';
+import { COUNTRY_CODE, CURRENCY_CODE } from '../src/lib/locale';
 import { money } from '../src/lib/format';
 import { suggestAllocation, uid } from '../src/lib/finance';
 
@@ -49,8 +50,9 @@ export default function AiBudgetPlan() {
           name: onboardingDraft.name || 'Ada Obi',
           email: state.pendingAuth?.email || 'ada@example.com',
           phone: state.pendingAuth?.phone || '+234 803 123 4567',
-          country: onboardingDraft.country,
-          currency: onboardingDraft.currency,
+          // Nigeria-only lock: fixed values, not user input (store re-hardcodes too)
+          country: COUNTRY_CODE,
+          currency: CURRENCY_CODE,
           occupation: onboardingDraft.occupation || 'SALARY_EARNER',
           occupationOther:
             onboardingDraft.occupation === 'OTHER' ? onboardingDraft.occupationOther.trim() || undefined : undefined,

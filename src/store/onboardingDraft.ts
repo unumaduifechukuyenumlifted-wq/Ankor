@@ -1,10 +1,10 @@
-/** Volatile onboarding draft — shared across screens 06–10 (not persisted). */
+/** Volatile onboarding draft — shared across screens 06–10 (not persisted).
+ *  Country/currency are intentionally absent: they are fixed NG/NGN values
+ *  (see src/lib/locale.ts), not onboarding inputs. */
 import { Occupation } from '../lib/types';
 
 export interface OnboardingDraft {
   name: string;
-  country: string;
-  currency: string;
   occupation: Occupation | '';
   occupationOther: string;
   income: string;
@@ -15,8 +15,6 @@ export interface OnboardingDraft {
 
 export const onboardingDraft: OnboardingDraft = {
   name: '',
-  country: 'Nigeria',
-  currency: 'NGN — Nigerian Naira (₦)',
   occupation: '',
   occupationOther: '',
   income: '',

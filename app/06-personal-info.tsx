@@ -1,4 +1,5 @@
-/** Screen 06 — Onboarding: Personal Information (expanded occupation enum + free-text OTHER). */
+/** Screen 06 — Onboarding: Personal Information (occupation + free-text OTHER).
+ *  Nigeria-only: no country/currency pickers — fixed NG/NGN (src/lib/locale.ts). */
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
@@ -6,36 +7,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppHeader, Button, Field, ProgressBar, SelectField } from '../src/components/ui';
 import { OptionSheet } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
+import { InfoBanner } from '../src/components/ui';
 import { onboardingDraft } from '../src/store/onboardingDraft';
 import { OCCUPATION_OPTIONS, normalizeOccupation, occupationLabel } from '../src/lib/occupations';
 import { Occupation } from '../src/lib/types';
-
-const COUNTRIES = [
-  { label: 'Nigeria', icon: 'flag' },
-  { label: 'Ghana', icon: 'flag' },
-  { label: 'Kenya', icon: 'flag' },
-  { label: 'South Africa', icon: 'flag' },
-  { label: 'United Kingdom', icon: 'flag' },
-  { label: 'United States', icon: 'flag' },
-];
-
-const CURRENCIES = [
-  { label: 'NGN — Nigerian Naira (₦)' },
-  { label: 'GHS — Ghanaian Cedi (₵)' },
-  { label: 'KES — Kenyan Shilling (KSh)' },
-  { label: 'USD — US Dollar ($)' },
-];
+import { NIGERIA_ONLY_BANNER } from '../src/lib/locale';
 
 export default function PersonalInfo() {
   const insets = useSafeAreaInsets();
   const [name, setName] = useState(onboardingDraft.name);
-  const [country, setCountry] = useState(onboardingDraft.country);
-  const [currency, setCurrency] = useState(onboardingDraft.currency);
   const [occupation, setOccupation] = useState<Occupation | ''>(
     onboardingDraft.occupation || '',
   );
   const [occupationOther, setOccupationOther] = useState(onboardingDraft.occupationOther ?? '');
-  const [sheet, setSheet] = useState<null | 'country' | 'currency' | 'occupation'>(null);
+  const [sheet, setSheet] = useState<null | 'occupation'>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const next = () => {
@@ -50,8 +35,6 @@ export default function PersonalInfo() {
     setErr(null);
     Object.assign(onboardingDraft, {
       name,
-      country,
-      currency,
       occupation,
       occupationOther: occupation === 'OTHER' ? occupationOther.trim() : '',
     });
@@ -67,8 +50,6 @@ export default function PersonalInfo() {
         <Text style={styles.sub}>This helps Anchor tailor your budget and AI coaching.</Text>
 
         <Field label="Full Name" placeholder="Ada Obi" value={name} onChangeText={(t) => { setName(t); setErr(null); }} style={{ marginTop: 22 }} />
-        <SelectField label="Country" value={country} onPress={() => setSheet('country')} icon="earth" style={{ marginTop: 12 }} />
-        <SelectField label="Currency" value={currency} onPress={() => setSheet('currency')} icon="cash" style={{ marginTop: 12 }} />
         <SelectField
           label="Occupation"
           value={occupation ? occupationLabel(occupation) : 'Select occupation'}
@@ -87,6 +68,9 @@ export default function PersonalInfo() {
             style={{ marginTop: 12 }}
           />
         ) : null}
+        <InfoBanner style={{ marginTop: 14 }} icon="lock-closed">
+          {NIGERIA_ONLY_BANNER}
+        </InfoBanner>
         {err ? <Text style={{ ...T.small, color: C.terracotta, marginTop: 10 }}>{err}</Text> : null}
 
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
@@ -94,22 +78,6 @@ export default function PersonalInfo() {
         </View>
       </View>
 
-      <OptionSheet
-        visible={sheet === 'country'}
-        title="Country"
-        options={COUNTRIES}
-        selected={country}
-        onSelect={setCountry}
-        onClose={() => setSheet(null)}
-      />
-      <OptionSheet
-        visible={sheet === 'currency'}
-        title="Currency"
-        options={CURRENCIES}
-        selected={currency}
-        onSelect={setCurrency}
-        onClose={() => setSheet(null)}
-      />
       <OptionSheet
         visible={sheet === 'occupation'}
         title="Occupation"

@@ -10,6 +10,7 @@ import { C, SHADOW, T } from '../../src/theme';
 import { useApp } from '../../src/store/AppProvider';
 import { scoreColor, scoreLabel } from '../../src/lib/finance';
 import { occupationLabel } from '../../src/lib/occupations';
+import { COUNTRY_NAME } from '../../src/lib/locale';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
@@ -36,7 +37,7 @@ export default function Profile() {
         <Avatar name={user?.name ?? 'A'} size={84} />
         <Text style={{ ...T.h2, marginTop: 12 }}>{user?.name ?? 'Friend'}</Text>
         <Text style={{ ...T.small, marginTop: 3 }}>
-          {user ? `${occupationLabel(user.occupation, user.occupationOther)} · ${user.country ?? 'Nigeria'}` : '—'}
+          {user ? `${occupationLabel(user.occupation, user.occupationOther)} · ${COUNTRY_NAME}` : '—'}
         </Text>
         <View style={styles.streakPill}>
           <Ionicons name="flame" size={13} color={C.gold} />

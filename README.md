@@ -39,6 +39,13 @@ On first launch you'll get the Splash → Welcome → Sign Up → OTP → Onboar
   see `src/components/Logo.tsx` (in-app) and `scripts/make_assets.py`
   (icon / splash / favicon PNGs)
 
+## Nigeria-only lock
+
+Anchor is Nigeria-only for now: **country = `NG`, currency = `NGN` (₦)** — fixed values, not user input.
+- No country/currency pickers anywhere (registration shows an info banner instead; Settings shows a locked display row)
+- User creation hardcodes both values at the store layer ("server-side"), ignoring any client-supplied values; legacy persisted users are normalized to NG/NGN on hydrate
+- Bank linking supports Nigerian banks only — no other payment rails, DVA providers, or currencies are wired in
+
 ## Access rules (Absolute Lock Integrity, spec §4.4)
 
 | Wallet | Withdrawal behavior |

@@ -24,6 +24,7 @@ import {
 } from '../lib/finance';
 import { isGoalMatured } from '../lib/locks';
 import { normalizeOccupation } from '../lib/occupations';
+import { COUNTRY_CODE, CURRENCY_CODE } from '../lib/locale';
 import { toISO, daysBetween } from '../lib/format';
 
 const STORAGE_KEY = 'anchor-state-v2';
@@ -48,7 +49,7 @@ export const INITIAL_STATE: AppState = {
   incomeDraft: null,
   withdrawDraft: null,
   offlineMode: false,
-  settings: { notifications: true, darkMode: false, biometric: false, currency: 'NGN — Nigerian Naira (₦)' },
+  settings: { notifications: true, darkMode: false, biometric: false },
 };
 
 /* ---------------------------------- Actions --------------------------------- */
@@ -231,6 +232,9 @@ export const reducer = (s: AppState, a: Action): AppState => {
 
     case 'COMPLETE_ONBOARDING': {
       const { user, income, frequency, nextIncomeDate, selectedGoals, split } = a.payload;
+      // Nigeria-only lock: country/currency are hardcoded server-side (NG/NGN).
+      // Client-supplied values for these fields are ignored entirely.
+      const fixedUser: User = { ...user, country: COUNTRY_CODE, currency: CURRENCY_CODE };
       const now = toISO(new Date());
       const wallets: Wallet[] = [
         { id: 'w-flex', type: 'flexible', name: 'Flexible Savings', balance: 0 },
@@ -264,7 +268,7 @@ export const reducer = (s: AppState, a: Action): AppState => {
         ...s,
         authed: true,
         onboarded: true,
-        user,
+        user: fixedUser,
         wallets,
         goals,
         transactions: seedHistory(income),
@@ -607,9 +611,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             unlockMode: g.unlockMode ?? 'date',
           }));
           const user = parsed.user
-            ? { ...parsed.user, occupation: normalizeOccupation(parsed.user.occupation) }
+            ? {
+                ...parsed.user,
+                occupation: normalizeOccupation(parsed.user.occupation),
+                country: COUNTRY_CODE, // Nigeria-only lock, applied to legacy data too
+                currency: CURRENCY_CODE,
+              }
             : null;
-          dispatch({ type: 'HYDRATE', state: { ...INITIAL_STATE, ...parsed, goals, user, hydrated: true } });
+          const settings = {
+            notifications: parsed.settings?.notifications ?? true,
+            darkMode: parsed.settings?.darkMode ?? false,
+            biometric: parsed.settings?.biometric ?? false,
+          };
+          dispatch({
+            type: 'HYDRATE',
+            state: { ...INITIAL_STATE, ...parsed, goals, user, settings, hydrated: true },
+          });
         } else {
           dispatch({ type: 'HYDRATE', state: INITIAL_STATE });
         }

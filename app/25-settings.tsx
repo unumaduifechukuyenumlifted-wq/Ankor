@@ -1,26 +1,18 @@
-/** Screen 25 — Settings: notifications, dark mode, currency, security, biometric,
- *  privacy, help center, delete account, about. (+ offline demo toggle for §6 error states) */
-import React, { useState } from 'react';
+/** Screen 25 — Settings. Currency is locked to NGN (Nigeria-only) — display only. */
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { AppHeader, Card, Row, Screen, Toggle } from '../src/components/ui';
-import { OptionSheet, Option } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
+import { COUNTRY_NAME, CURRENCY_DISPLAY } from '../src/lib/locale';
 import { useApp } from '../src/store/AppProvider';
-
-const CURRENCIES: Option[] = [
-  { label: 'NGN — Nigerian Naira (₦)' },
-  { label: 'GHS — Ghanaian Cedi (₵)' },
-  { label: 'KES — Kenyan Shilling (KSh)' },
-  { label: 'USD — US Dollar ($)' },
-];
 
 export default function Settings() {
   const insets = useSafeAreaInsets();
   const { state, dispatch, showModal } = useApp();
   const s = state.settings;
-  const [sheet, setSheet] = useState<null | 'currency'>(null);
 
   const set = (patch: Partial<typeof s>) => dispatch({ type: 'SET_SETTINGS', patch });
 
@@ -62,7 +54,13 @@ export default function Settings() {
           }}
           right={<Toggle value={s.darkMode} onChange={(v) => { set({ darkMode: v }); if (v) infoModal('moon', 'Dark mode is docking', 'A warm navy dark theme is in the works and will arrive in the next Anchor release.'); }} />}
         />
-        <Row icon="cash-outline" label="Currency" sub={s.currency} onPress={() => setSheet('currency')} last />
+        <Row
+          icon="cash-outline"
+          label="Currency"
+          sub={`${CURRENCY_DISPLAY} · ${COUNTRY_NAME} only`}
+          right={<Ionicons name="lock-closed" size={15} color={C.gray} />}
+          last
+        />
       </Card>
 
       <Text style={{ ...T.label, marginTop: 18, marginBottom: 8 }}>SECURITY & PRIVACY</Text>
@@ -115,14 +113,6 @@ export default function Settings() {
         />
       </Card>
 
-      <OptionSheet
-        visible={sheet === 'currency'}
-        title="Currency"
-        options={CURRENCIES}
-        selected={s.currency}
-        onSelect={(label) => set({ currency: label })}
-        onClose={() => setSheet(null)}
-      />
     </Screen>
   );
 }

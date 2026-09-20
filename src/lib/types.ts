@@ -25,7 +25,9 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  /** Fixed 'NG' — kept in the schema, never user-selectable (Nigeria-only lock). */
   country: string;
+  /** Fixed 'NGN' — kept in the schema, never user-selectable (Nigeria-only lock). */
   currency: string;
   occupation: Occupation;
   /** Free text, used only when occupation === 'OTHER' — nobody is forced into a category. */
@@ -127,7 +129,6 @@ export interface Settings {
   notifications: boolean;
   darkMode: boolean;
   biometric: boolean;
-  currency: string;
 }
 
 export interface ChatMessage {
