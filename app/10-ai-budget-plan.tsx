@@ -51,9 +51,7 @@ export default function AiBudgetPlan() {
           phone: state.pendingAuth?.phone || '+234 803 123 4567',
           country: onboardingDraft.country,
           currency: onboardingDraft.currency,
-          occupation: onboardingDraft.occupation || 'SALARY_EARNER',
-          occupationOther:
-            onboardingDraft.occupation === 'OTHER' ? onboardingDraft.occupationOther.trim() || undefined : undefined,
+          occupation: onboardingDraft.occupation || 'Salary Earner',
         },
         income,
         frequency: onboardingDraft.frequency,

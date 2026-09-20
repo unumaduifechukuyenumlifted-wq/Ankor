@@ -5,21 +5,6 @@ export type WalletType = 'flexible' | 'locked' | 'emergency';
 export type TxType = 'income' | 'expense' | 'savings' | 'withdrawal';
 export type NotifType = 'budget_alert' | 'ai_tip' | 'goal_milestone' | 'income_reminder' | 'savings_reminder';
 
-/** Occupation enum (expanded). OTHER pairs with the free-text `occupationOther` field. */
-export type Occupation =
-  | 'STUDENT'
-  | 'NYSC'
-  | 'SALARY_EARNER'
-  | 'FREELANCER'
-  | 'BUSINESS_OWNER'
-  | 'CIVIL_SERVANT'
-  | 'ARTISAN'
-  | 'TRADER'
-  | 'FARMER'
-  | 'UNEMPLOYED'
-  | 'RETIRED'
-  | 'OTHER';
-
 export interface User {
   id: string;
   name: string;
@@ -27,9 +12,7 @@ export interface User {
   phone: string;
   country: string;
   currency: string;
-  occupation: Occupation;
-  /** Free text, used only when occupation === 'OTHER' — nobody is forced into a category. */
-  occupationOther?: string;
+  occupation: string;
 }
 
 export interface Wallet {

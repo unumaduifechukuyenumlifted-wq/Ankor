@@ -23,7 +23,6 @@ import {
   walletForGoalCategory,
 } from '../lib/finance';
 import { isGoalMatured } from '../lib/locks';
-import { normalizeOccupation } from '../lib/occupations';
 import { toISO, daysBetween } from '../lib/format';
 
 const STORAGE_KEY = 'anchor-state-v2';
@@ -598,18 +597,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .then((raw) => {
         if (raw) {
           const parsed = JSON.parse(raw) as AppState;
-          // Migration: goals created before the Absolute Lock spec lack accessType/unlockMode;
-          // occupations stored before the enum expand as legacy labels.
+          // Migration: goals created before the Absolute Lock spec lack accessType/unlockMode.
           const typeByWallet = new Map((parsed.wallets ?? []).map((w) => [w.id, w.type]));
           const goals = (parsed.goals ?? []).map((g) => ({
             ...g,
             accessType: g.accessType ?? typeByWallet.get(g.walletId) ?? 'flexible',
             unlockMode: g.unlockMode ?? 'date',
           }));
-          const user = parsed.user
-            ? { ...parsed.user, occupation: normalizeOccupation(parsed.user.occupation) }
-            : null;
-          dispatch({ type: 'HYDRATE', state: { ...INITIAL_STATE, ...parsed, goals, user, hydrated: true } });
+          dispatch({ type: 'HYDRATE', state: { ...INITIAL_STATE, ...parsed, goals, hydrated: true } });
         } else {
           dispatch({ type: 'HYDRATE', state: INITIAL_STATE });
         }

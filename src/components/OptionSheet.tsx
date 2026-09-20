@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Animated, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, T } from '../theme';
@@ -41,7 +41,7 @@ export const OptionSheet: React.FC<{
         <Text style={[T.h3, { textAlign: 'center', marginBottom: 8, fontFamily: 'PlayfairDisplay_700Bold', fontSize: 18 }]}>
           {title}
         </Text>
-        <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <View style={{ maxHeight: 380 }}>
           {options.map((o) => {
             const isSel = o.label === selected;
             return (
@@ -66,7 +66,7 @@ export const OptionSheet: React.FC<{
               </Pressable>
             );
           })}
-        </ScrollView>
+        </View>
       </Animated.View>
     </View>
   );
