@@ -1,19 +1,14 @@
-/** Screen 06 — Onboarding: Personal Information. */
+/** Screen 06 — Onboarding: Personal Information (expanded occupation enum + free-text OTHER). */
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader, Button, Field, ProgressBar, SelectField , FlexScroll } from '../src/components/ui';
+import { AppHeader, Button, Field, ProgressBar, SelectField } from '../src/components/ui';
 import { OptionSheet } from '../src/components/OptionSheet';
 import { C, T } from '../src/theme';
 import { onboardingDraft } from '../src/store/onboardingDraft';
-
-const OCCUPATIONS = [
-  { label: 'Student', icon: 'school' },
-  { label: 'NYSC', icon: 'ribbon' },
-  { label: 'Salary Earner', icon: 'briefcase' },
-  { label: 'Freelancer', icon: 'laptop' },
-];
+import { OCCUPATION_OPTIONS, normalizeOccupation, occupationLabel } from '../src/lib/occupations';
+import { Occupation } from '../src/lib/types';
 
 const COUNTRIES = [
   { label: 'Nigeria', icon: 'flag' },
@@ -36,7 +31,10 @@ export default function PersonalInfo() {
   const [name, setName] = useState(onboardingDraft.name);
   const [country, setCountry] = useState(onboardingDraft.country);
   const [currency, setCurrency] = useState(onboardingDraft.currency);
-  const [occupation, setOccupation] = useState(onboardingDraft.occupation);
+  const [occupation, setOccupation] = useState<Occupation | ''>(
+    onboardingDraft.occupation || '',
+  );
+  const [occupationOther, setOccupationOther] = useState(onboardingDraft.occupationOther ?? '');
   const [sheet, setSheet] = useState<null | 'country' | 'currency' | 'occupation'>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -45,14 +43,25 @@ export default function PersonalInfo() {
       setErr('Add your name and occupation to continue');
       return;
     }
-    Object.assign(onboardingDraft, { name, country, currency, occupation });
+    if (occupation === 'OTHER' && occupationOther.trim().length < 2) {
+      setErr('Tell us what you do — a word is enough');
+      return;
+    }
+    setErr(null);
+    Object.assign(onboardingDraft, {
+      name,
+      country,
+      currency,
+      occupation,
+      occupationOther: occupation === 'OTHER' ? occupationOther.trim() : '',
+    });
     router.push('/07-income-setup');
   };
 
   return (
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       <AppHeader onBack={() => router.back()} title="Personal information" />
-      <FlexScroll style={{ paddingHorizontal: 20 }}>
+      <View style={{ paddingHorizontal: 20, flex: 1 }}>
         <ProgressBar progress={0.25} color={C.gold} style={{ marginBottom: 22 }} />
         <Text style={styles.heading}>Let's get to know you</Text>
         <Text style={styles.sub}>This helps Anchor tailor your budget and AI coaching.</Text>
@@ -62,18 +71,28 @@ export default function PersonalInfo() {
         <SelectField label="Currency" value={currency} onPress={() => setSheet('currency')} icon="cash" style={{ marginTop: 12 }} />
         <SelectField
           label="Occupation"
-          value={occupation || 'Select occupation'}
+          value={occupation ? occupationLabel(occupation) : 'Select occupation'}
           placeholder={!occupation}
           onPress={() => setSheet('occupation')}
           icon="briefcase"
           style={{ marginTop: 12 }}
         />
+        {occupation === 'OTHER' ? (
+          <Field
+            label="What do you do?"
+            placeholder="e.g. Content creator, Driver"
+            value={occupationOther}
+            onChangeText={(t) => { setOccupationOther(t); setErr(null); }}
+            autoFocus
+            style={{ marginTop: 12 }}
+          />
+        ) : null}
         {err ? <Text style={{ ...T.small, color: C.terracotta, marginTop: 10 }}>{err}</Text> : null}
 
         <View style={{ marginTop: 'auto', paddingBottom: insets.bottom + 20 }}>
           <Button label="Continue" onPress={next} />
         </View>
-      </FlexScroll>
+      </View>
 
       <OptionSheet
         visible={sheet === 'country'}
@@ -94,9 +113,13 @@ export default function PersonalInfo() {
       <OptionSheet
         visible={sheet === 'occupation'}
         title="Occupation"
-        options={OCCUPATIONS}
-        selected={occupation}
-        onSelect={setOccupation}
+        options={OCCUPATION_OPTIONS.map((o) => ({ label: o.label, icon: o.icon }))}
+        selected={occupation ? occupationLabel(occupation) : undefined}
+        onSelect={(label) => {
+          const opt = OCCUPATION_OPTIONS.find((o) => o.label === label);
+          if (opt) setOccupation(opt.key);
+          setErr(null);
+        }}
         onClose={() => setSheet(null)}
       />
     </View>
