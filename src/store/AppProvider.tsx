@@ -620,6 +620,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 250);
   }, [state]);
 
+  // Logout / account wipe: persist the reset IMMEDIATELY. Without this, closing the
+  // app inside the 250ms debounce window could resurrect the old session on next
+  // launch — which then skips straight to Home instead of onboarding.
+  const prevAuthed = useRef(false);
+  useEffect(() => {
+    if (!state.hydrated) return;
+    if (prevAuthed.current && !state.authed) {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, hydrated: false })).catch(() => undefined);
+    }
+    prevAuthed.current = state.authed;
+  }, [state.authed, state.hydrated]);
+
   const value = useMemo<AppContextValue>(
     () => ({
       state,
